@@ -1,0 +1,10 @@
+{
+  "name": "ValuableSoundTrigger",
+  "version_number": "1.0.0",
+  "website_url": "",
+  "description": "Triggers break, impact and destroy sound of a valuable without damaging it to prank your friends !",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.*",
+    "Zehs-REPOLib-4.*"
+  ]
+}
