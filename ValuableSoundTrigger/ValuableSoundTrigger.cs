@@ -7,13 +7,14 @@ namespace ValuableSoundTrigger
 {
     [BepInPlugin("LingeringHopes.ValuableSoundTrigger", "ValuableSoundTrigger", "1.0")]
     [BepInDependency("REPOLib", BepInDependency.DependencyFlags.HardDependency)]
-    [BepInDependency("nickklmao.menulib", BepInDependency.DependencyFlags.HardDependency)]
     public class ValuableSoundTrigger : BaseUnityPlugin
     {
         internal static ValuableSoundTrigger Instance { get; private set; } = null!;
         internal new static ManualLogSource Logger => Instance._logger;
         private ManualLogSource _logger => base.Logger;
         internal Harmony? Harmony { get; set; }
+
+        static ValuableSoundNetwork valuableSoundNetwork = null;
 
         void Awake()
         {
@@ -22,14 +23,15 @@ namespace ValuableSoundTrigger
             // Prevent the plugin from being deleted
             this.gameObject.transform.parent = null;
             this.gameObject.hideFlags = HideFlags.HideAndDontSave;
-
-            Harmony.CreateAndPatchAll(typeof(PlayerUpdatePatch));
         }
 
         void Start()
         {
             InputTriggerManager triggerManager = InputTriggerManager.Instance;
             triggerManager.LoadValuableSoundTriggerActionFromConfig(Config);
+
+            valuableSoundNetwork = new ValuableSoundNetwork();
+            valuableSoundNetwork.Initialize(triggerManager);
         }
 
         internal void Patch()

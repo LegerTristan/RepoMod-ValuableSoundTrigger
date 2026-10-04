@@ -1,49 +1,29 @@
 ﻿using ExitGames.Client.Photon;
-using HarmonyLib;
 using Photon.Pun;
 using REPOLib.Modules;
-using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UIElements;
 
 namespace ValuableSoundTrigger
-{   
-    class NetworkValuableSoundPlayData
+{
+    internal class ValuableSoundNetwork
     {
-        public Sound SourceSound;
+        NetworkedEvent playValuableSoundEvent = null;
 
-        public Vector3 SourcePosition;
+        NetworkedEvent playGrabImpactDetectorAllBreaksEvent = null;
 
-        public NetworkValuableSoundPlayData(Sound valuableSound, Vector3 valuablePosition)
+        bool listening = false;
+
+        public void Initialize(InputTriggerManager triggerManager)
         {
-            SourceSound = valuableSound;
-            SourcePosition = valuablePosition;
-        }
-    }
-
-    internal static class PlayerUpdatePatch
-    {
-        static NetworkedEvent playValuableSoundEvent = null;
-
-        static NetworkedEvent playGrabImpactDetectorAllBreaksEvent = null;
-
-        static bool listening = false;
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerAvatar), "Start")]
-        private static void InitializeActions(PlayerAvatar __instance)
-        {
-            InputTriggerManager triggerManager = InputTriggerManager.Instance;
-
             triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.ListenToValuableSound, startedCallback: ListenToValuableSoundTriggers, canceledCallback: UnlistenToValuableSoundTriggers);
-            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayBreakLightAudio, startedCallback: PlayBreakLightAudio);
-            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayBreakMediumAudio, startedCallback: PlayBreakMediumAudio);
-            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayBreakHeavyAudio, startedCallback: PlayBreakHeavyAudio);
-            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayImpactLightAudio, startedCallback: PlayImpactLightAudio);
-            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayImpactMediumAudio, startedCallback: PlayImpactMediumAudio);
-            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayImpactHeavyAudio, startedCallback: PlayImpactHeavyAudio);
+            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayBreakLightAudio, startedCallback: (context) => PlayAudio(InputTriggerCode.PlayBreakLightAudio));
+            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayBreakMediumAudio, startedCallback: (context) => PlayAudio(InputTriggerCode.PlayBreakMediumAudio));
+            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayBreakHeavyAudio, startedCallback: (context) => PlayAudio(InputTriggerCode.PlayBreakHeavyAudio));
+            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayImpactLightAudio, startedCallback: (context) => PlayAudio(InputTriggerCode.PlayImpactLightAudio));
+            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayImpactMediumAudio, startedCallback: (context) => PlayAudio(InputTriggerCode.PlayImpactMediumAudio));
+            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayImpactHeavyAudio, startedCallback: (context) => PlayAudio(InputTriggerCode.PlayImpactHeavyAudio));
             triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayPhysGrabDetectAudio, startedCallback: PlayPhysGrabDetecEvent);
-            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayDestroyAudio, startedCallback: PlayDestroyAudio);
+            triggerManager.AddValuableSoundTriggerAction(InputTriggerCode.PlayDestroyAudio, startedCallback: (context) => PlayAudio(InputTriggerCode.PlayDestroyAudio));
 
             playValuableSoundEvent = new NetworkedEvent("PlayValuableSound", OnPlayValuableSoundReceived);
             playGrabImpactDetectorAllBreaksEvent = new NetworkedEvent("PlayValuableSoundFromGrabDetector", OnPlayValuableSoundFromGrabDetectorReceived);
@@ -61,11 +41,8 @@ namespace ValuableSoundTrigger
 
                 InputTriggerCode audioToPlay = (InputTriggerCode)datas[1];
 
-                ValuableSoundTrigger.Logger.LogInfo($"instigatorPhotonView {instigatorPhotonView} AND valuable {instigatorPhotonView?.GetComponent<ValuableObject>()}");
                 if (null != instigatorPhotonView && instigatorPhotonView.TryGetComponent(out ValuableObject valuable) && valuable.audioPreset)
                 {
-                    ValuableSoundTrigger.Logger.LogInfo($"valuable {valuable} AND valuable.audioPreset {valuable.audioPreset}");
-
                     switch (audioToPlay)
                     {
                         case InputTriggerCode.PlayBreakLightAudio:
@@ -115,16 +92,15 @@ namespace ValuableSoundTrigger
             {
                 ValuableSoundTrigger.Logger.LogError($"Error when playing sound from PhysGrabObjectImpactDetector : {ex}");
             }
-
         }
 
         #region Listening
-        static void ListenToValuableSoundTriggers(InputAction.CallbackContext context) => listening = true;
+        void ListenToValuableSoundTriggers(InputAction.CallbackContext context) => listening = true;
 
-        static void UnlistenToValuableSoundTriggers(InputAction.CallbackContext context) => listening = false;
+        void UnlistenToValuableSoundTriggers(InputAction.CallbackContext context) => listening = false;
         #endregion
 
-        static bool RetrieveValuablePhotonViewID(out int photonViewID)
+        bool RetrieveValuablePhotonViewID(out int photonViewID)
         {
             photonViewID = -1;
 
@@ -156,60 +132,11 @@ namespace ValuableSoundTrigger
             }
         }
 
-        #region PlayAudios
-        static void PlayBreakLightAudio(InputAction.CallbackContext context)
+        void PlayAudio(InputTriggerCode code)
         {
             if (RetrieveValuablePhotonViewID(out int valuablePhotonViewID))
             {
-                playValuableSoundEvent.RaiseEvent(new object[] {valuablePhotonViewID, InputTriggerCode.PlayBreakLightAudio}, NetworkingEvents.RaiseAll, SendOptions.SendReliable);
-            }
-        }
-
-        static void PlayBreakMediumAudio(InputAction.CallbackContext context)
-        {
-            if (RetrieveValuablePhotonViewID(out int valuablePhotonViewID))
-            {
-                playValuableSoundEvent.RaiseEvent(new object[] {valuablePhotonViewID, InputTriggerCode.PlayBreakMediumAudio}, NetworkingEvents.RaiseAll, SendOptions.SendReliable);
-            }
-        }
-
-        static void PlayBreakHeavyAudio(InputAction.CallbackContext context)
-        {
-            if (RetrieveValuablePhotonViewID(out int valuablePhotonViewID))
-            {
-                playValuableSoundEvent.RaiseEvent(new object[] { valuablePhotonViewID, InputTriggerCode.PlayBreakHeavyAudio }, NetworkingEvents.RaiseAll, SendOptions.SendReliable);
-            }
-        }
-
-        static void PlayImpactLightAudio(InputAction.CallbackContext context)
-        {
-            if (RetrieveValuablePhotonViewID(out int valuablePhotonViewID))
-            {
-                playValuableSoundEvent.RaiseEvent(new object[] { valuablePhotonViewID, InputTriggerCode.PlayImpactLightAudio }, NetworkingEvents.RaiseAll, SendOptions.SendReliable);
-            }
-        }
-
-        static void PlayImpactMediumAudio(InputAction.CallbackContext context)
-        {
-            if (RetrieveValuablePhotonViewID(out int valuablePhotonViewID))
-            {
-                playValuableSoundEvent.RaiseEvent(new object[] { valuablePhotonViewID, InputTriggerCode.PlayImpactMediumAudio }, NetworkingEvents.RaiseAll, SendOptions.SendReliable);
-            }
-        }
-
-        static void PlayImpactHeavyAudio(InputAction.CallbackContext context)
-        {
-            if (RetrieveValuablePhotonViewID(out int valuablePhotonViewID))
-            {
-                playValuableSoundEvent.RaiseEvent(new object[] { valuablePhotonViewID, InputTriggerCode.PlayImpactHeavyAudio }, NetworkingEvents.RaiseAll, SendOptions.SendReliable);
-            }
-        }
-
-        static void PlayDestroyAudio(InputAction.CallbackContext context)
-        {
-            if (RetrieveValuablePhotonViewID(out int valuablePhotonViewID))
-            {
-                playValuableSoundEvent.RaiseEvent(new object[] { valuablePhotonViewID, InputTriggerCode.PlayDestroyAudio }, NetworkingEvents.RaiseAll, SendOptions.SendReliable);
+                playValuableSoundEvent.RaiseEvent(new object[] { valuablePhotonViewID, code }, NetworkingEvents.RaiseAll, SendOptions.SendReliable);
             }
         }
 
@@ -217,7 +144,7 @@ namespace ValuableSoundTrigger
         /// Specific function for compatibility with SillyValuables mod.
         /// </summary>
         /// <param name="context">Callback context of the action. Not used, you can ignore this.</param>
-        static void PlayPhysGrabDetecEvent(InputAction.CallbackContext context)
+        void PlayPhysGrabDetecEvent(InputAction.CallbackContext context)
         {
             try
             {
@@ -239,6 +166,5 @@ namespace ValuableSoundTrigger
                 ValuableSoundTrigger.Logger.LogError($"Error when raising event from PhysGrabObjectImpactDetector : {ex}");
             }
         }
-        #endregion
     }
 }

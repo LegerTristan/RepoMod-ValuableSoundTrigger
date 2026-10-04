@@ -75,7 +75,6 @@ namespace ValuableSoundTrigger
         internal void AddValuableSoundTriggerAction(InputTriggerCode triggerCode, Action<InputAction.CallbackContext> startedCallback = null,
             Action<InputAction.CallbackContext> performedCallback = null, Action<InputAction.CallbackContext> canceledCallback = null)
         {
-            ValuableSoundTrigger.Logger.LogInfo("valuableSoundInputActionMap.devices has value => " + valuableSoundInputActionMap.devices.HasValue);
             if (triggerActions.ContainsKey(triggerCode))
             {
                 ValuableSoundTrigger.Logger.LogWarning("Input already exist for => " + triggerCode);
@@ -89,7 +88,6 @@ namespace ValuableSoundTrigger
             if(triggerConfigs.TryGetValue(triggerCode, out ConfigEntry<string> configEntry))
             {
                 keyPath = configEntry.Value.Contains("<") ? configEntry.Value : $"<Keyboard>/{configEntry.Value}";
-                ValuableSoundTrigger.Logger.LogInfo($"Input {triggerCode} loaded from config: {keyPath}");
             }
             else
             {
@@ -139,8 +137,6 @@ namespace ValuableSoundTrigger
 
                 return previousKeyPath.Contains("/") ? previousKeyPath.Split('/')[1] : previousKeyPath;
             }
-
-            ValuableSoundTrigger.Logger.LogInfo($"{triggerCode} rebound to: {keyPath}");
 
             return keyPath.Contains("/") ? keyPath.Split('/')[1] : keyPath;
         }
