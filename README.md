@@ -1,6 +1,6 @@
 # ValuableSoundTrigger
 
-**A mod for [R.E.P.O](https://store.steampowered.com/) introducing dynamic audio triggers for valuable objects. Built to prank your friends with fake damage sound on valuables or simply to play *Tralalero Tralala* from [SillyValuables](https://thunderstore.io/c/repo/p/Sangrento/SillyValuables/) mod, as you wish.**  
+**A mod for [R.E.P.O](https://store.steampowered.com/app/3241660/REPO/) introducing dynamic audio triggers for valuable objects. Built to prank your friends with fake damage sound on valuables or simply to play *Tralalero Tralala* from [SillyValuables](https://thunderstore.io/c/repo/p/Sangrento/SillyValuables/) mod, as you wish.**  
 *Originally crafted as a private mod for a group of friends, I decided to open-source it for the community following the Sunstone update.*
 
 The mod is fully updated and compatible with the **Sunstone** update (and migrated to Unity 6).
@@ -9,7 +9,7 @@ The mod is fully updated and compatible with the **Sunstone** update (and migrat
 
 ## 📑 Table of Contents
 - [Getting Started](#-getting-started)
-- [Known Limitations & Troubleshooting](#-known-limitations--troubleshooting)
+- [Known Limitations & Support](#-known-limitations--support)
 - [License](#-license)
 
 ---
