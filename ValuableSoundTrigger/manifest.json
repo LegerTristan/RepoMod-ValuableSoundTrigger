@@ -5,6 +5,8 @@
   "description": "Triggers break, impact and destroy sound of a valuable without damaging it to prank your friends !",
   "dependencies": [
     "BepInEx-BepInExPack-5.*",
-    "Zehs-REPOLib-4.*"
+    "Zehs-REPOLib-4.*",
+    "REPOModding-MenuLib-2.6.0",
+    "REPOModding-REPOConfig-1.2.7"
   ]
 }

@@ -96,8 +96,9 @@ namespace ValuableSoundTrigger
 
         #region Listening
         void ListenToValuableSoundTriggers(InputAction.CallbackContext context) => listening = true;
+        
 
-        void UnlistenToValuableSoundTriggers(InputAction.CallbackContext context) => listening = false;
+        void UnlistenToValuableSoundTriggers(InputAction.CallbackContext context) =>  listening = false;
         #endregion
 
         bool RetrieveValuablePhotonViewID(out int photonViewID)
